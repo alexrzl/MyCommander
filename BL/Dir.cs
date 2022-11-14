@@ -13,6 +13,8 @@
 			return GetDirStructures();
 		}
 
+		public static string GetSizeSuffix(Int64 value, int decimalPlaces = 2) => SizeSuffix(value, decimalPlaces);
+
 		private static List<DirStructure> GetDirStructures()
 		{
 			List<DirStructure> dirStructure = new List<DirStructure>();
@@ -119,7 +121,7 @@
 			return string.Join("", attributes);
 		}
 
-		private static string SizeSuffix(Int64 value, int decimalPlaces = 1)
+		private static string SizeSuffix(Int64 value, int decimalPlaces = 2)
 		{
 			if (decimalPlaces < 0)
 			{

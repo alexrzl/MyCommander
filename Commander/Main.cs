@@ -6,44 +6,61 @@ namespace Commander
 {
 	public partial class Main : Form
 	{
-		private const int COLUMN_NAME = 0;
-		private const int COLUMN_FULL_NAME = 1;
-		private const int COLUMN_TYPE_OBJECT = 6;
-		
+		private const int COLUMN_FULL_NAME = 0;
+		private const int COLUMN_TYPE_OBJECT = 1;
+		private const int COLUMN_NAME = 2;
 		private Split CurrentSplit;
 		private string CurrentDirLeft = "";
 		private string CurrentDirRight = "";
+		private List<DriveInfo> DeviceList;
 
 		public Main()
 		{
 			InitializeComponent();
 		}
 
-		private void Main_Load(object sender, EventArgs e)
+		#region ѕроцедуры и функции инициализации
+
+		private void InitialComboboxDevices()
 		{
-			InitialDataGridView();
-			InitialSplitControl();
+			DeviceList = DriveInfo.GetDrives().ToList();
+			var i = 1;
+
+			foreach (var drive in DeviceList)
+			{
+				try
+				{
+					comboBoxDevicesLeft.Items.Add($"{drive.Name.Substring(0, 1)} [{drive.VolumeLabel}]");
+					comboBoxDevicesRight.Items.Add($"{drive.Name.Substring(0, 1)} [{drive.VolumeLabel}]");
+					toolStripDiskLeft.Items.Add(new ToolStripButton()
+					{
+						Name = $"toolStripLeftButton_{i}",
+						Text = $"{drive.Name.Substring(0, 1)}",
+						ToolTipText = $"{drive.Name.Substring(0, 1)} [{drive.VolumeLabel}]",
+						DisplayStyle = ToolStripItemDisplayStyle.Text,
+						Width = Height
+					});
+					toolStripDiskRight.Items.Add(new ToolStripButton()
+					{
+						Name = $"toolStripRightButton_{i}",
+						Text = $"{drive.Name.Substring(0, 1)}",
+						ToolTipText = $"{drive.Name.Substring(0, 1)} [{drive.VolumeLabel}]",
+						DisplayStyle = ToolStripItemDisplayStyle.Text,
+						Width = Height
+					});
+
+				}
+				catch { }
+
+				i++;
+			}
+
+			ChangeDefaultDrive();
 		}
 
-		private void Main_Resize(object sender, EventArgs e)
-		{
-			InitialSplitControl();
-		}
+		#endregion
 
-		private void InitialSplitControl()
-		{
-			var width = splitContainer.Width - splitContainer.SplitterWidth;
-			splitContainer.SplitterDistance = width / 2;
-		}
-
-		private void InitialDataGridView()
-		{
-			var currentPath = @"C:\";
-			List<DirStructure> dirListLeft = Dir.GetDirectoriesInfo(currentPath);
-			List<DirStructure> dirListRight = Dir.GetDirectoriesInfo(currentPath);
-			dataGridViewLeft.DataSource = dirListLeft;
-			dataGridViewRight.DataSource = dirListRight;
-		}
+		#region —лужебные процедуры и формы
 
 		private void OpenObject(DataGridViewRow row)
 		{
@@ -97,8 +114,10 @@ namespace Commander
 		{
 			int rowIndex = -1;
 
+#pragma warning disable CS8600 // ѕреобразование литерала, допускающего значение NULL или возможного значени€ NULL в тип, не допускающий значение NULL.
 			DataGridViewRow row = gridView.Rows.Cast<DataGridViewRow>()
 				.FirstOrDefault(r => r.Cells[COLUMN_FULL_NAME].Value.ToString().Equals(searchName));
+#pragma warning restore CS8600 // ѕреобразование литерала, допускающего значение NULL или возможного значени€ NULL в тип, не допускающий значение NULL.
 
 			if (row != null)
 			{
@@ -108,16 +127,141 @@ namespace Commander
 			}
 		}
 
+		private string GetDriveInfo(string device)
+		{
+			string devInfo = "";
+			var result = DriveInfo.GetDrives().FirstOrDefault(x => x.Name.StartsWith(device));
+
+			if (result != null)
+			{
+				devInfo = $"[{result.VolumeLabel}] {Dir.GetSizeSuffix(result.TotalFreeSpace)} из {Dir.GetSizeSuffix(result.TotalSize)} свободно";
+			}
+			
+			return devInfo;
+		}
+		
+		private void ChangeDefaultDrive()
+		{
+			if (DeviceList.Count > 0)
+			{
+				comboBoxDevicesLeft.SelectedIndex = 0;
+				comboBoxDevicesRight.SelectedIndex = 0;
+#pragma warning disable CS8602 // –азыменование веро€тной пустой ссылки.
+				(toolStripDiskLeft.Items[0] as ToolStripButton).Checked = true;
+#pragma warning restore CS8602 // –азыменование веро€тной пустой ссылки.
+#pragma warning disable CS8602 // –азыменование веро€тной пустой ссылки.
+				(toolStripDiskRight.Items[0] as ToolStripButton).Checked = true;
+#pragma warning restore CS8602 // –азыменование веро€тной пустой ссылки.
+			}
+		}
+
+		private void LoadDataGridView(DataGridView gridView, string path)
+		{
+			List<DirStructure> dirList = Dir.GetDirectoriesInfo(path);
+			gridView.DataSource = dirList;
+		}
+
+		private void OnCheckedToolStripButtonDisk(ToolStrip toolStrip, string nameItem)
+		{
+			for (int i = 0; i < toolStrip.Items.Count; i++)
+			{
+				ToolStripButton? item = toolStrip.Items[i] as ToolStripButton;
+
+				if (item != null)
+				{
+					item.Checked = item.Name.Equals(nameItem);
+				}
+			}
+		}
+
+		#endregion
+
+		#region —обыти€ формы
+
+		private void Main_Load(object sender, EventArgs e)
+		{
+			InitialComboboxDevices();
+		}
+
 		private void dataGridViewLeft_CellContentDoubleClick(object sender, DataGridViewCellEventArgs e)
 		{
 			CurrentSplit = Split.Left;
-			OpenObject(dataGridViewLeft.Rows[e.RowIndex]);
+
+			if (e.RowIndex >= 0)
+			{
+				OpenObject(dataGridViewLeft.Rows[e.RowIndex]);
+			}
 		}
 
 		private void dataGridViewRight_CellContentDoubleClick(object sender, DataGridViewCellEventArgs e)
 		{
 			CurrentSplit = Split.Right;
-			OpenObject(dataGridViewRight.Rows[e.RowIndex]);
+
+			if (e.RowIndex >= 0)
+			{
+				OpenObject(dataGridViewRight.Rows[e.RowIndex]);
+			}
 		}
+
+		private void comboBoxDevicesLeft_SelectedIndexChanged(object sender, EventArgs e)
+		{
+			if (sender is ComboBox comboBox)
+			{
+				var deviceName = comboBox.SelectedItem.ToString()?.Substring(0, 1);
+
+				if (!string.IsNullOrWhiteSpace(deviceName))
+				{
+					labelDeviceInfoLeft.Text = GetDriveInfo(deviceName);
+					LoadDataGridView(dataGridViewLeft, $"{deviceName}:\\");
+				}
+			}
+
+		}
+
+		private void comboBoxDevicesRight_SelectedIndexChanged(object sender, EventArgs e)
+		{
+			if (sender is ComboBox comboBox)
+			{
+				var deviceName = comboBox.SelectedItem.ToString()?.Substring(0, 1);
+
+				if (!string.IsNullOrWhiteSpace(deviceName))
+				{
+					labelDeviceInfoRight.Text = GetDriveInfo(deviceName);
+					LoadDataGridView(dataGridViewRight, $"{deviceName}:\\");
+				}
+			}
+		}
+
+		private void toolStripDiskLeft_ItemClicked(object sender, ToolStripItemClickedEventArgs e)
+		{
+			if (e.ClickedItem is ToolStripButton button)
+			{
+				var text = button.ToolTipText;
+
+				if (!string.IsNullOrWhiteSpace(text))
+				{
+					var index = comboBoxDevicesLeft.FindStringExact(text);
+					comboBoxDevicesLeft.SelectedIndex = index != -1 ? index : index++;
+					OnCheckedToolStripButtonDisk(toolStripDiskLeft, button.Name);
+				}
+			}
+		}
+
+		private void toolStripDiskRight_ItemClicked(object sender, ToolStripItemClickedEventArgs e)
+		{
+			if (e.ClickedItem is ToolStripButton button)
+			{
+				var text = button.ToolTipText;
+
+				if (!string.IsNullOrWhiteSpace(text))
+				{
+					var index = comboBoxDevicesRight.FindStringExact(text);
+					comboBoxDevicesRight.SelectedIndex = index != -1 ? index : index++;
+					OnCheckedToolStripButtonDisk(toolStripDiskRight, button.Name);
+				}
+			}
+		}
+
+		#endregion
 	}
 }

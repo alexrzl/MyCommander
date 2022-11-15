@@ -57,12 +57,16 @@
 			this.tableLayoutPanel1 = new System.Windows.Forms.TableLayoutPanel();
 			this.toolStripDiskLeft = new System.Windows.Forms.ToolStrip();
 			this.toolStripDiskRight = new System.Windows.Forms.ToolStrip();
+			this.panelToolbar = new System.Windows.Forms.Panel();
+			this.btnShowHidden = new System.Windows.Forms.Button();
+			this.btnEditAttributes = new System.Windows.Forms.Button();
 			this.panelInfoSizeLeft.SuspendLayout();
 			((System.ComponentModel.ISupportInitialize)(this.dirStructureBindingSource)).BeginInit();
 			this.panelInfoSizeRight.SuspendLayout();
 			((System.ComponentModel.ISupportInitialize)(this.dataGridViewRight)).BeginInit();
 			((System.ComponentModel.ISupportInitialize)(this.dataGridViewLeft)).BeginInit();
 			this.tableLayoutPanel1.SuspendLayout();
+			this.panelToolbar.SuspendLayout();
 			this.SuspendLayout();
 			// 
 			// panelInfoSizeLeft
@@ -152,9 +156,11 @@
 			this.dataGridViewRight.ReadOnly = true;
 			this.dataGridViewRight.RowTemplate.Height = 25;
 			this.dataGridViewRight.SelectionMode = System.Windows.Forms.DataGridViewSelectionMode.FullRowSelect;
-			this.dataGridViewRight.Size = new System.Drawing.Size(517, 557);
+			this.dataGridViewRight.Size = new System.Drawing.Size(517, 505);
 			this.dataGridViewRight.TabIndex = 1;
-			this.dataGridViewRight.CellMouseDoubleClick += new System.Windows.Forms.DataGridViewCellMouseEventHandler(this.dataGridViewRight_CellMouseDoubleClick);
+			this.dataGridViewRight.CellMouseClick += new System.Windows.Forms.DataGridViewCellMouseEventHandler(this.dataGridView_CellMouseClick);
+			this.dataGridViewRight.CellMouseDoubleClick += new System.Windows.Forms.DataGridViewCellMouseEventHandler(this.dataGridView_CellMouseDoubleClick);
+			this.dataGridViewRight.MouseUp += new System.Windows.Forms.MouseEventHandler(this.dataGridView_MouseUp);
 			// 
 			// dataGridViewTextBoxColumn1
 			// 
@@ -244,12 +250,11 @@
 			this.dataGridViewLeft.ReadOnly = true;
 			this.dataGridViewLeft.RowTemplate.Height = 25;
 			this.dataGridViewLeft.SelectionMode = System.Windows.Forms.DataGridViewSelectionMode.FullRowSelect;
-			this.dataGridViewLeft.Size = new System.Drawing.Size(517, 557);
+			this.dataGridViewLeft.Size = new System.Drawing.Size(517, 505);
 			this.dataGridViewLeft.TabIndex = 3;
-			this.dataGridViewLeft.CellMouseClick += new System.Windows.Forms.DataGridViewCellMouseEventHandler(this.dataGridViewLeft_CellMouseClick);
-			this.dataGridViewLeft.CellMouseDoubleClick += new System.Windows.Forms.DataGridViewCellMouseEventHandler(this.dataGridViewLeft_CellMouseDoubleClick);
-			this.dataGridViewLeft.MouseDown += new System.Windows.Forms.MouseEventHandler(this.dataGridViewLeft_MouseDown);
-			this.dataGridViewLeft.MouseUp += new System.Windows.Forms.MouseEventHandler(this.dataGridViewLeft_MouseUp);
+			this.dataGridViewLeft.CellMouseClick += new System.Windows.Forms.DataGridViewCellMouseEventHandler(this.dataGridView_CellMouseClick);
+			this.dataGridViewLeft.CellMouseDoubleClick += new System.Windows.Forms.DataGridViewCellMouseEventHandler(this.dataGridView_CellMouseDoubleClick);
+			this.dataGridViewLeft.MouseUp += new System.Windows.Forms.MouseEventHandler(this.dataGridView_MouseUp);
 			// 
 			// FullName
 			// 
@@ -332,13 +337,14 @@
 			this.tableLayoutPanel1.Controls.Add(this.toolStripDiskLeft, 0, 0);
 			this.tableLayoutPanel1.Controls.Add(this.toolStripDiskRight, 2, 0);
 			this.tableLayoutPanel1.GrowStyle = System.Windows.Forms.TableLayoutPanelGrowStyle.FixedSize;
-			this.tableLayoutPanel1.Location = new System.Drawing.Point(12, 12);
+			this.tableLayoutPanel1.Location = new System.Drawing.Point(12, 64);
 			this.tableLayoutPanel1.Name = "tableLayoutPanel1";
 			this.tableLayoutPanel1.RowCount = 3;
 			this.tableLayoutPanel1.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Absolute, 35F));
 			this.tableLayoutPanel1.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Absolute, 35F));
 			this.tableLayoutPanel1.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 100F));
-			this.tableLayoutPanel1.Size = new System.Drawing.Size(1054, 633);
+			this.tableLayoutPanel1.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Absolute, 20F));
+			this.tableLayoutPanel1.Size = new System.Drawing.Size(1054, 581);
 			this.tableLayoutPanel1.TabIndex = 4;
 			// 
 			// toolStripDiskLeft
@@ -365,11 +371,40 @@
 			this.toolStripDiskRight.Text = "toolStrip2";
 			this.toolStripDiskRight.ItemClicked += new System.Windows.Forms.ToolStripItemClickedEventHandler(this.toolStripDiskRight_ItemClicked);
 			// 
+			// panelToolbar
+			// 
+			this.panelToolbar.Controls.Add(this.btnShowHidden);
+			this.panelToolbar.Controls.Add(this.btnEditAttributes);
+			this.panelToolbar.Location = new System.Drawing.Point(12, 12);
+			this.panelToolbar.Name = "panelToolbar";
+			this.panelToolbar.Size = new System.Drawing.Size(1051, 46);
+			this.panelToolbar.TabIndex = 5;
+			// 
+			// btnShowHidden
+			// 
+			this.btnShowHidden.Image = global::Commander.Properties.Resources.icons8_show_property_32;
+			this.btnShowHidden.Location = new System.Drawing.Point(49, 3);
+			this.btnShowHidden.Name = "btnShowHidden";
+			this.btnShowHidden.Size = new System.Drawing.Size(40, 40);
+			this.btnShowHidden.TabIndex = 0;
+			this.btnShowHidden.UseVisualStyleBackColor = true;
+			// 
+			// btnEditAttributes
+			// 
+			this.btnEditAttributes.Image = global::Commander.Properties.Resources.icons8_edit_property_32;
+			this.btnEditAttributes.Location = new System.Drawing.Point(3, 3);
+			this.btnEditAttributes.Name = "btnEditAttributes";
+			this.btnEditAttributes.Size = new System.Drawing.Size(40, 40);
+			this.btnEditAttributes.TabIndex = 0;
+			this.btnEditAttributes.UseVisualStyleBackColor = true;
+			this.btnEditAttributes.Click += new System.EventHandler(this.btnEditAttributes_Click);
+			// 
 			// Main
 			// 
 			this.AutoScaleDimensions = new System.Drawing.SizeF(7F, 15F);
 			this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
 			this.ClientSize = new System.Drawing.Size(1078, 657);
+			this.Controls.Add(this.panelToolbar);
 			this.Controls.Add(this.tableLayoutPanel1);
 			this.Name = "Main";
 			this.Text = "My Commander";
@@ -383,6 +418,7 @@
 			((System.ComponentModel.ISupportInitialize)(this.dataGridViewLeft)).EndInit();
 			this.tableLayoutPanel1.ResumeLayout(false);
 			this.tableLayoutPanel1.PerformLayout();
+			this.panelToolbar.ResumeLayout(false);
 			this.ResumeLayout(false);
 
 		}
@@ -414,5 +450,8 @@
 		private DataGridViewTextBoxColumn sizeDataGridViewTextBoxColumn1;
 		private DataGridViewTextBoxColumn dateDataGridViewTextBoxColumn1;
 		private DataGridViewTextBoxColumn attributeDataGridViewTextBoxColumn1;
+		private Panel panelToolbar;
+		private Button btnEditAttributes;
+		private Button btnShowHidden;
 	}
 }

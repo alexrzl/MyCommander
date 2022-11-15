@@ -1,5 +1,6 @@
 using BL;
 using BL.Enums;
+using ShellTestApp;
 using System.Diagnostics;
 
 namespace Commander
@@ -183,21 +184,21 @@ namespace Commander
 			InitialComboboxDevices();
 		}
 
-		private void dataGridViewLeft_CellContentDoubleClick(object sender, DataGridViewCellEventArgs e)
+		private void dataGridViewLeft_CellMouseDoubleClick(object sender, DataGridViewCellMouseEventArgs e)
 		{
 			CurrentSplit = Split.Left;
 
-			if (e.RowIndex >= 0)
+			if (e.Button == MouseButtons.Left && e.RowIndex >= 0)
 			{
 				OpenObject(dataGridViewLeft.Rows[e.RowIndex]);
 			}
 		}
 
-		private void dataGridViewRight_CellContentDoubleClick(object sender, DataGridViewCellEventArgs e)
+		private void dataGridViewRight_CellMouseDoubleClick(object sender, DataGridViewCellMouseEventArgs e)
 		{
 			CurrentSplit = Split.Right;
 
-			if (e.RowIndex >= 0)
+			if (e.Button == MouseButtons.Left && e.RowIndex >= 0)
 			{
 				OpenObject(dataGridViewRight.Rows[e.RowIndex]);
 			}
@@ -263,5 +264,55 @@ namespace Commander
 		}
 
 		#endregion
+
+		private void dataGridViewLeft_MouseDown(object sender, MouseEventArgs e)
+		{
+			
+			
+		}
+
+		private void dataGridViewLeft_CellMouseClick(object sender, DataGridViewCellMouseEventArgs e)
+		{
+			if (e.Button == MouseButtons.Right)
+			{
+				if (sender is DataGridView gridView)
+				{
+					var result = gridView.Rows.Cast<DataGridViewRow>().SingleOrDefault(x => x.Index == e.RowIndex && x.Selected);
+
+					if (result == null)
+					{
+						gridView.ClearSelection();
+						gridView.Rows[e.RowIndex].Selected = true;
+					}
+				}
+			}
+		}
+
+		private void dataGridViewLeft_MouseUp(object sender, MouseEventArgs e)
+		{
+			if (e.Button == MouseButtons.Right)
+			{
+				if (sender is DataGridView dataGrid)
+				{
+					var rows = dataGrid.SelectedRows;
+					FileInfo[] arrFI = new FileInfo[rows.Count];
+
+					for (var i = 0; i < rows.Count; i++)
+					{
+						var fullName = rows[i].Cells[COLUMN_FULL_NAME].Value.ToString() ?? "";
+
+						if (!string.IsNullOrWhiteSpace(fullName))
+						{
+							arrFI[i] = new FileInfo(fullName);
+						}
+					}
+
+					if (arrFI.Length > 0)
+					{
+						new ShellContextMenu().ShowContextMenu(arrFI, this.PointToScreen(new Point(e.X, e.Y)));
+					}
+				}
+			}
+		}
 	}
 }

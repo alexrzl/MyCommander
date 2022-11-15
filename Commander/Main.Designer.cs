@@ -154,11 +154,11 @@
 			this.dataGridViewRight.SelectionMode = System.Windows.Forms.DataGridViewSelectionMode.FullRowSelect;
 			this.dataGridViewRight.Size = new System.Drawing.Size(517, 557);
 			this.dataGridViewRight.TabIndex = 1;
-			this.dataGridViewRight.CellDoubleClick += new System.Windows.Forms.DataGridViewCellEventHandler(this.dataGridViewRight_CellContentDoubleClick);
+			this.dataGridViewRight.CellMouseDoubleClick += new System.Windows.Forms.DataGridViewCellMouseEventHandler(this.dataGridViewRight_CellMouseDoubleClick);
 			// 
 			// dataGridViewTextBoxColumn1
 			// 
-			this.dataGridViewTextBoxColumn1.DataPropertyName = "Name";
+			this.dataGridViewTextBoxColumn1.DataPropertyName = "FullName";
 			this.dataGridViewTextBoxColumn1.HeaderText = "FullName";
 			this.dataGridViewTextBoxColumn1.Name = "dataGridViewTextBoxColumn1";
 			this.dataGridViewTextBoxColumn1.ReadOnly = true;
@@ -246,6 +246,10 @@
 			this.dataGridViewLeft.SelectionMode = System.Windows.Forms.DataGridViewSelectionMode.FullRowSelect;
 			this.dataGridViewLeft.Size = new System.Drawing.Size(517, 557);
 			this.dataGridViewLeft.TabIndex = 3;
+			this.dataGridViewLeft.CellMouseClick += new System.Windows.Forms.DataGridViewCellMouseEventHandler(this.dataGridViewLeft_CellMouseClick);
+			this.dataGridViewLeft.CellMouseDoubleClick += new System.Windows.Forms.DataGridViewCellMouseEventHandler(this.dataGridViewLeft_CellMouseDoubleClick);
+			this.dataGridViewLeft.MouseDown += new System.Windows.Forms.MouseEventHandler(this.dataGridViewLeft_MouseDown);
+			this.dataGridViewLeft.MouseUp += new System.Windows.Forms.MouseEventHandler(this.dataGridViewLeft_MouseUp);
 			// 
 			// FullName
 			// 
@@ -389,13 +393,6 @@
 		private Panel panelInfoSizeRight;
 		private Label labelDeviceInfoRight;
 		private ComboBox comboBoxDevicesRight;
-		private DataGridViewTextBoxColumn dataGridViewTextBoxColumn1;
-		private DataGridViewTextBoxColumn typeObjectDataGridViewTextBoxColumn1;
-		private DataGridViewTextBoxColumn nameDataGridViewTextBoxColumn1;
-		private DataGridViewTextBoxColumn typeDataGridViewTextBoxColumn1;
-		private DataGridViewTextBoxColumn sizeDataGridViewTextBoxColumn1;
-		private DataGridViewTextBoxColumn dateDataGridViewTextBoxColumn1;
-		private DataGridViewTextBoxColumn attributeDataGridViewTextBoxColumn1;
 		private Panel panelInfoSizeLeft;
 		private Label labelDeviceInfoLeft;
 		private ComboBox comboBoxDevicesLeft;
@@ -410,5 +407,12 @@
 		private TableLayoutPanel tableLayoutPanel1;
 		private ToolStrip toolStripDiskLeft;
 		private ToolStrip toolStripDiskRight;
+		private DataGridViewTextBoxColumn dataGridViewTextBoxColumn1;
+		private DataGridViewTextBoxColumn typeObjectDataGridViewTextBoxColumn1;
+		private DataGridViewTextBoxColumn nameDataGridViewTextBoxColumn1;
+		private DataGridViewTextBoxColumn typeDataGridViewTextBoxColumn1;
+		private DataGridViewTextBoxColumn sizeDataGridViewTextBoxColumn1;
+		private DataGridViewTextBoxColumn dateDataGridViewTextBoxColumn1;
+		private DataGridViewTextBoxColumn attributeDataGridViewTextBoxColumn1;
 	}
 }

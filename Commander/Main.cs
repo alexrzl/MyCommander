@@ -15,6 +15,7 @@ namespace Commander
 		private string CurrentDirLeft = "";
 		private string CurrentDirRight = "";
 		private bool ShowHideObject = false;
+		
 		private List<DriveInfo> DeviceList => DriveInfo.GetDrives().ToList();
 
 		public Main()

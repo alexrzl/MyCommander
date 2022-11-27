@@ -9,6 +9,11 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <None Remove="Resources\icons8-edit-property-80.png" />
+    <None Remove="Resources\icons8-show-property-80.png" />
+  </ItemGroup>
+
+  <ItemGroup>
     <ProjectReference Include="..\BL\BL.csproj" />
   </ItemGroup>
 

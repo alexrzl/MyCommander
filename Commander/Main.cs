@@ -1,6 +1,7 @@
 using BL;
 using BL.Enums;
 using ShellTestApp;
+using System;
 using System.Diagnostics;
 
 namespace Commander
@@ -13,6 +14,7 @@ namespace Commander
 		private Split CurrentSplit;
 		private string CurrentDirLeft = "";
 		private string CurrentDirRight = "";
+		private bool ShowHideObject = false;
 		private List<DriveInfo> DeviceList => DriveInfo.GetDrives().ToList();
 
 		public Main()
@@ -68,6 +70,17 @@ namespace Commander
 			{
 				var path = row.Cells[COLUMN_FULL_NAME].Value.ToString();
 				var name = row.Cells[COLUMN_NAME].Value.ToString();
+
+				if (string.IsNullOrWhiteSpace(path))
+				{
+					throw new ArgumentNullException("Путь не может быть пустым или равным Null", nameof(path));
+				}
+
+				if (string.IsNullOrWhiteSpace(name))
+				{
+					throw new ArgumentNullException("Имя файла не может быть пустым или равным Null", nameof(name));
+				}
+
 				List<DirStructure> dirList = Dir.GetDirectoriesInfo(path);
 
 				if (CurrentSplit == Split.Left)
@@ -145,12 +158,12 @@ namespace Commander
 			if (DeviceList.Count > 0)
 			{
 				comboBoxDevicesLeft.SelectedIndex = 0;
-				comboBoxDevicesRight.SelectedIndex = 0;
+				comboBoxDevicesRight.SelectedIndex = 1;
 #pragma warning disable CS8602 // Разыменование вероятной пустой ссылки.
 				(toolStripDiskLeft.Items[0] as ToolStripButton).Checked = true;
 #pragma warning restore CS8602 // Разыменование вероятной пустой ссылки.
 #pragma warning disable CS8602 // Разыменование вероятной пустой ссылки.
-				(toolStripDiskRight.Items[0] as ToolStripButton).Checked = true;
+				(toolStripDiskRight.Items[1] as ToolStripButton).Checked = true;
 #pragma warning restore CS8602 // Разыменование вероятной пустой ссылки.
 			}
 		}
@@ -158,7 +171,65 @@ namespace Commander
 		private void LoadDataGridView(DataGridView gridView, string path)
 		{
 			List<DirStructure> dirList = Dir.GetDirectoriesInfo(path);
-			gridView.DataSource = dirList;
+			gridView.DataSource = !ShowHideObject 
+				? dirList 
+				: dirList.Where(x => x.Attribute.IndexOf("h") == -1 && x.Attribute.IndexOf("s") == -1).ToList();
+
+			if (gridView.Name.IndexOf("Left") != -1)
+			{
+				if (!CurrentDirLeft.Equals(path))
+				{
+					CurrentDirLeft = path;
+				}
+				
+			}
+			else 
+			{
+				if (!CurrentDirRight.Equals(path))
+				{
+					CurrentDirRight = path;
+				}
+			}
+		}
+
+		private void ReloadDataGridView(DataGridView gridView, string fullPath)
+		{
+			if (!Directory.Exists(fullPath))
+			{
+				throw new ArgumentNullException("Путь к каталогу не найден", nameof(fullPath));
+			}
+
+			if (gridView == null)
+			{
+				throw new ArgumentNullException("Объект DataGridView не может быть Null", nameof(gridView));
+			}
+
+			var selectedRows = gridView.SelectedRows;
+			var listIndexes = new List<int>();
+
+			foreach (DataGridViewRow item in selectedRows)
+			{
+				listIndexes.Add(item.Index);
+			}
+
+			LoadDataGridView(gridView, fullPath);
+			listIndexes.Sort();
+
+			for (int i = 0; i < listIndexes.Count; i++)
+			{
+				DataGridViewRow? row = gridView.Rows.OfType<DataGridViewRow>().Where(x => x.Index == listIndexes[i]).SingleOrDefault();
+
+				if (row != null)
+				{
+					if (i == 0)
+					{
+						gridView.ClearSelection();
+						gridView.CurrentCell = gridView[COLUMN_NAME, listIndexes[i]];
+					}
+
+					row.Selected = true;
+				}
+			}
 		}
 
 		private void OnCheckedToolStripButtonDisk(ToolStrip toolStrip, string nameItem)
@@ -198,11 +269,12 @@ namespace Commander
 
 		private void dataGridView_CellMouseDoubleClick(object sender, DataGridViewCellMouseEventArgs e)
 		{
-			if (e.Button == MouseButtons.Left && e.RowIndex >= 0)
+			if (sender is DataGridView dataGrid)
 			{
-				if (sender is DataGridView dataGrid)
+				GetCurrentSplit(dataGrid.Name);
+
+				if (e.Button == MouseButtons.Left && e.RowIndex >= 0)
 				{
-					GetCurrentSplit(dataGrid.Name);
 					OpenObject(dataGrid.Rows[e.RowIndex]);
 				}
 			}
@@ -210,46 +282,48 @@ namespace Commander
 
 		private void dataGridView_MouseUp(object sender, MouseEventArgs e)
 		{
-			if (e.Button == MouseButtons.Right)
-			{
-				if (sender is DataGridView dataGrid)
-				{
-					var rows = dataGrid.SelectedRows;
-					FileInfo[] arrFI = new FileInfo[rows.Count];
+			// @TODO Подумать как реализовать контекстное меню, в данный момент не могу отслежывать действия меню
+			//if (e.Button == MouseButtons.Right)
+			//{
+			//	if (sender is DataGridView dataGrid)
+			//	{
+			//		var rows = dataGrid.SelectedRows;
+			//		FileInfo[] arrFI = new FileInfo[rows.Count];
 
-					for (var i = 0; i < rows.Count; i++)
-					{
-						var fullName = rows[i].Cells[COLUMN_FULL_NAME].Value.ToString() ?? "";
+			//		for (var i = 0; i < rows.Count; i++)
+			//		{
+			//			var fullName = rows[i].Cells[COLUMN_FULL_NAME].Value.ToString() ?? "";
 
-						if (!string.IsNullOrWhiteSpace(fullName))
-						{
-							arrFI[i] = new FileInfo(fullName);
-						}
-					}
+			//			if (!string.IsNullOrWhiteSpace(fullName))
+			//			{
+			//				arrFI[i] = new FileInfo(fullName);
+			//			}
+			//		}
 
-					if (arrFI.Length > 0)
-					{
-						var X = e.X;
-						var Y = e.Y;
+			//		if (arrFI.Length > 0)
+			//		{
+			//			var X = e.X;
+			//			var Y = e.Y;
 
-						if (CurrentSplit == Split.Right)
-						{
-							X = X + dataGrid.Location.X;
-						}
+			//			if (CurrentSplit == Split.Right)
+			//			{
+			//				X = X + dataGrid.Location.X;
+			//			}
 
-						new ShellContextMenu().ShowContextMenu(arrFI, this.PointToScreen(new Point(X, Y)));
-					}
-				}
-			}
+			//			new ShellContextMenu().ShowContextMenu(arrFI, this.PointToScreen(new Point(X, Y)));
+			//		}
+			//	}
+			//}
 		}
 
 		private void dataGridView_CellMouseClick(object sender, DataGridViewCellMouseEventArgs e)
 		{
-			if (e.Button == MouseButtons.Right)
+			if (sender is DataGridView gridView)
 			{
-				if (sender is DataGridView gridView)
+				GetCurrentSplit(gridView.Name);
+
+				if (e.Button == MouseButtons.Right)
 				{
-					GetCurrentSplit(gridView.Name);
 					var result = gridView.Rows.Cast<DataGridViewRow>().SingleOrDefault(x => x.Index == e.RowIndex && x.Selected);
 
 					if (result == null)
@@ -269,8 +343,10 @@ namespace Commander
 
 				if (!string.IsNullOrWhiteSpace(deviceName))
 				{
+					var fullName = $"{deviceName}:\\";
 					labelDeviceInfoLeft.Text = GetDriveInfo(deviceName);
-					LoadDataGridView(dataGridViewLeft, $"{deviceName}:\\");
+					LoadDataGridView(dataGridViewLeft, fullName);
+					CurrentDirLeft = fullName;
 				}
 			}
 
@@ -284,8 +360,10 @@ namespace Commander
 
 				if (!string.IsNullOrWhiteSpace(deviceName))
 				{
+					var fullName = $"{deviceName}:\\";
 					labelDeviceInfoRight.Text = GetDriveInfo(deviceName);
-					LoadDataGridView(dataGridViewRight, $"{deviceName}:\\");
+					LoadDataGridView(dataGridViewRight, fullName);
+					CurrentDirRight = fullName;
 				}
 			}
 		}
@@ -322,7 +400,38 @@ namespace Commander
 
 		private void btnEditAttributes_Click(object sender, EventArgs e)
 		{
+			var gridView = CurrentSplit == Split.Left ? dataGridViewLeft : dataGridViewRight;
+			var listPath = new List<string>();
 
+			foreach (DataGridViewRow row in gridView.SelectedRows)
+			{
+				var fullPath = row.Cells[COLUMN_FULL_NAME].Value.ToString();
+
+				if (!string.IsNullOrWhiteSpace(fullPath))
+				{
+					listPath.Add(fullPath);
+				}
+			}
+
+			var form = new Attribute(listPath);
+			if (form.ShowDialog() == DialogResult.OK)
+			{
+				if (CurrentSplit == Split.Left)
+				{
+					ReloadDataGridView(dataGridViewLeft, CurrentDirLeft);
+				}
+				else
+				{
+					ReloadDataGridView(dataGridViewRight, CurrentDirRight);
+				}
+			}
+		}
+
+		private void btnShowHidden_Click(object sender, EventArgs e)
+		{
+			ShowHideObject = !ShowHideObject;
+			ReloadDataGridView(dataGridViewLeft, CurrentDirLeft);
+			ReloadDataGridView(dataGridViewRight, CurrentDirRight);
 		}
 
 		#endregion

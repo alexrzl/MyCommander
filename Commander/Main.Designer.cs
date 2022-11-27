@@ -388,6 +388,7 @@
 			this.btnShowHidden.Size = new System.Drawing.Size(40, 40);
 			this.btnShowHidden.TabIndex = 0;
 			this.btnShowHidden.UseVisualStyleBackColor = true;
+			this.btnShowHidden.Click += new System.EventHandler(this.btnShowHidden_Click);
 			// 
 			// btnEditAttributes
 			// 

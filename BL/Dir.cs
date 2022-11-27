@@ -5,7 +5,7 @@
 		private static string DirPath { get; set; }
 		private const string DIR_SIZE = "<Папка>";
 		private const string DEFAULT_ATTRIBUTES = "----";
-		private static readonly string[] SizeSuffixes = { "bytes", "KB", "MB", "GB", "TB", "PB", "EB", "ZB", "YB" };
+		private static readonly string[] SizeSuffixes = { "байт", "КБ", "МБ", "ГБ", "ТБ", "PB", "EB", "ZB", "YB" };
 
 		public static List<DirStructure> GetDirectoriesInfo(string path)
 		{
@@ -14,6 +14,40 @@
 		}
 
 		public static string GetSizeSuffix(Int64 value, int decimalPlaces = 2) => SizeSuffix(value, decimalPlaces);
+
+		public static void SetAttributes(string fullPath, FileAttributes  fileAttribute, bool status, SearchOption searchOption = SearchOption.TopDirectoryOnly)
+		{
+			if (!Directory.Exists(fullPath) && !File.Exists(fullPath))
+			{
+				throw new FileNotFoundException("Файл/Директория не найдена", nameof(fullPath));
+			}
+
+			if (searchOption != SearchOption.AllDirectories)
+			{
+				SetAttributes(fullPath, fileAttribute, status);
+			}
+			else
+			{
+				IEnumerable<string> fullPatrhList = Directory.EnumerateDirectories(fullPath, "*", searchOption);
+
+				foreach (var item in fullPatrhList)
+				{
+					SetAttributes(item, fileAttribute, status);
+				}
+			}
+		}
+
+		private static void SetAttributes(string fullPath, FileAttributes fileAttribute, bool status)
+		{
+			if (status)
+			{
+				File.SetAttributes(fullPath, File.GetAttributes(fullPath) | fileAttribute);
+			}
+			else
+			{
+				File.SetAttributes(fullPath, File.GetAttributes(fullPath) & ~fileAttribute);
+			}
+		}
 
 		private static List<DirStructure> GetDirStructures()
 		{
@@ -105,17 +139,17 @@
 
 			if ((attr & FileAttributes.Archive) == FileAttributes.Archive)
 			{
-				attributes[1] = "r";
+				attributes[1] = "a";
 			}
 
 			if ((attr & FileAttributes.Hidden) == FileAttributes.Hidden)
 			{
-				attributes[1] = "h";
+				attributes[2] = "h";
 			}
 
 			if ((attr & FileAttributes.System) == FileAttributes.System)
 			{
-				attributes[1] = "s";
+				attributes[3] = "s";
 			}
 
 			return string.Join("", attributes);
